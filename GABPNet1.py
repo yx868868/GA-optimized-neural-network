@@ -440,6 +440,8 @@ if __name__ == "__main__":
     pre_org = np.array(pre) * (max(y)-min(y)) + min(y)
     y_test_org = np.array(y_test) * (max(y) - min(y)) + min(y)
     errors_std_org = np.std(pre_org - y_test_org)
+    print("errors_std:\n", errors_std)
+    print("errors_std_org\n", errors_std_org)
     #显示测试图像
     plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
