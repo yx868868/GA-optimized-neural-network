@@ -21,4 +21,13 @@ python 用GA算法优化BP神经网络，预测回归问题
 
 用GA算法优化BP神经网络的权值和阈值：
 种群数量10，迭代80次，交叉概率0.8，变异概率0.01，BP神经网络学习率：0.05，迭代500次：
-测试样本60个的平均无误差：errors_std_org： 1.5342603366697878
+测试样本60个的平均无误差，errors_std_org： 1.5342603366697878
+![Iamge](https://github.com/yx868868/GA-optimized-neural-network/blob/main/pic/500%E6%AC%A1.png)
+
+迭代700次
+测试样本60个的平均无误差：errors_std_org：1.0408958068854353
+![Iamge](https://github.com/yx868868/GA-optimized-neural-network/blob/main/pic/700%E6%AC%A1.png)
+
+单独用BP神经网络，学习率：0.05，迭代500次：
+测试样本60个的平均无误差，errors_std_org：3.2695353501231272
+![Iamge](https://github.com/yx868868/GA-optimized-neural-network/blob/main/pic/BP500.png)
