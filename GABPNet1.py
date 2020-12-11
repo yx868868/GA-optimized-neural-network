@@ -5,6 +5,7 @@ from scipy.optimize import fsolve
 import matplotlib.pyplot as plt
 import heapq
 from tkinter import _flatten
+# 读取txt中的数据，预处理去“，”
 def load_data_wrapper(filename):
     lineData = []
     with open(filename) as txtData:
@@ -13,7 +14,7 @@ def load_data_wrapper(filename):
             linedata = line.strip().split(',')
             lineData.append(linedata)
     return lineData
-
+# 提出特征和标签，特征做输入，标签为输出
 def splitData(dataset):
     Character= []
     Label = []
@@ -21,7 +22,7 @@ def splitData(dataset):
         Character.append([float(tk) for tk in dataset[i][1:-1]])
         Label.append(float(dataset[i][-1]))
     return Character, Label
-
+#输入特征数据归一化
 def max_min_norm_x(dataset):
     min_data = []
     for i in range(len(dataset)):
@@ -36,14 +37,12 @@ def max_min_norm_x(dataset):
     for x in np.nditer(data, op_flags=['readwrite']):
         #x[...] = 2 * (x -new_min)/(new_max-new_min)-1
         x[...] = (x - new_min) / (new_max - new_min)
-        #print('x[...]:',x[...])
         data_x.append(x[...])
     data_x3 = []
     for index in range(0, len(data_x), 3):
         data_x3.append([data_x[index], data_x[index+1], data_x[index+2]])
-    #print("data_x3:",data_x3)
     return data_x3
-
+#输出特征归一化
 def max_min_norm_y(dataset):
     new_min = min(dataset)
     new_max = max(dataset)
@@ -52,54 +51,26 @@ def max_min_norm_y(dataset):
         y = (dataset[i] -new_min)/(new_max-new_min)
         #y = 2 * (dataset[i] - new_min) / (new_max - new_min) - 1
         data_y.append(y)
-        #print(y)
     return data_y
-
-def de_max_min_norm_y(dataset1,dataset2):
-    new_min = min(dataset1)
-    new_max = max(dataset1)
-    de_data_y = []
-    for i in range(len(dataset2)):
-        y = dataset2[i] * (new_max - new_min) + new_min
-        de_data_y.append(y)
-    return de_data_y
-
-
 
 # 求染色体长度
 def getEncodeLength(decisionvariables, delta):
      # 将每个变量的编码长度放入数组
      lengths = []
-     uper0 = decisionvariables[0][1]
-     low0 = decisionvariables[0][0]
-     res = fsolve(lambda x: ((uper0 - low0) / delta - 2 ** x + 1), 6)
+     uper = decisionvariables[0][1]
+     low = decisionvariables[0][0]
+     res = fsolve(lambda x: ((uper - low) / delta - 2 ** x + 1), 6)
      length0 = int(np.ceil(res[0]))
-     uper1 = decisionvariables[0][1]
-     low1 = decisionvariables[0][0]
-     res = fsolve(lambda x: ((uper1 - low1) / delta - 2 ** x + 1), 2)
+     res = fsolve(lambda x: ((uper - low) / delta - 2 ** x + 1), 2)
      length1 = int(np.ceil(res[0]))
-     uper2 = decisionvariables[0][1]
-     low2 = decisionvariables[0][0]
-     res = fsolve(lambda x: ((uper2 - low2) / delta - 2 ** x + 1), 2)
+     res = fsolve(lambda x: ((uper - low) / delta - 2 ** x + 1), 2)
      length2 = int(np.ceil(res[0]))
-     uper3 = decisionvariables[0][1]
-     low3= decisionvariables[0][0]
-     res = fsolve(lambda x: ((uper3 - low3) / delta - 2 ** x + 1), 1)
+     res = fsolve(lambda x: ((uper - low) / delta - 2 ** x + 1), 1)
      length3= int(np.ceil(res[0]))
      lengths.append(length0)
      lengths.append(length1)
      lengths.append(length2)
      lengths.append(length3)
-     print("染色体长度:", lengths)
-     # for decisionvar in decisionvariables:
-     #     uper = decisionvar[1]
-     #     low = decisionvar[0]
-     #     # res()返回一个数组
-     #     res = fsolve(lambda x: ((uper - low) / delta - 2 ** x + 1), 10)
-     #     # ceil()向上取整
-     #     length = int(np.ceil(res[0]))
-     #     lengths.append(length)
-     #print("染色体长度:", lengths)
      return lengths,length0,length1,length2,length3
 # 随机生成初始化种群
 def getinitialPopulation(length,length0,length1,length2,length3, populationSize):
@@ -116,15 +87,8 @@ def getinitialPopulation(length,length0,length1,length2,length3, populationSize)
         chromsomes1[popusize, :] = chromsomes[popusize, :][6:8]
         chromsomes2[popusize, :] = chromsomes[popusize, :][8:10]
         chromsomes3[popusize, :] =chromsomes[popusize, :][10:11]
-        #print('chromsomes[popusize, :]',chromsomes[popusize, :])  #100条，一个种群，100个体
-    # print(chromsomes)
-    # print(chromsomes0)
-    # print(chromsomes1)
-    # print(chromsomes2)
-    # print(chromsomes3)
-    # print(chromsomes.shape) #(100,11)
     return chromsomes,chromsomes0,chromsomes1,chromsomes2,chromsomes3
-
+# 生成新种群
 def getPopulation(population, populationSize):
     population0 = np.zeros((populationSize, 6), dtype=np.int)
     population1 = np.zeros((populationSize, 2), dtype=np.int)
@@ -137,17 +101,6 @@ def getPopulation(population, populationSize):
         population2[popusize, :] = population[popusize, :][8:10]
         population3[popusize, :] = population[popusize, :][10:11]
     return population0, population1, population2, population3
-# 随机生成初始化种群
-# def getinitialPopulation(length, populationSize):
-#     chromsomes = np.zeros((populationSize, length), dtype=np.int)
-#     print("len",length)  # 每个变量的值相加 17*4 = 68
-#     for popusize in range(populationSize):
-#         # np.random.randit()产生[0,2)之间的随机整数，第三个参数表示随机数的数量
-#         chromsomes[popusize, :] = np.random.randint(0, 2, length)
-#         #print('chromsomes[popusize, :]',chromsomes[popusize, :])  #100条，一个种群，100个体
-#     print(chromsomes)
-#     print(chromsomes.shape) #(100,33) (100,68)
-#     return chromsomes
 
  # 染色体解码得到表现形的解
 def getDecode(population,population0,population1,population2,population3, encodelength, decisionvariables):
@@ -158,17 +111,14 @@ def getDecode(population,population0,population1,population2,population3, encode
         population_w1 = (
                 (population0.dot(np.power(2, 0)) / np.power(2, 1) - 0.5) *
                 (decisionvariables[0][1] - decisionvariables[0][0]) + 0.5 * (decisionvariables[0][0] +decisionvariables[0][1]))
-    #print("population_w1", population_w1)
     for i in range(population1.shape[1]):
         population_v1 = (
                 (population1.dot(np.power(2, 0)) / np.power(2, 1) - 0.5) *
                 (decisionvariables[0][1] - decisionvariables[0][0]) + 0.5 * (decisionvariables[0][0] + decisionvariables[0][1]))
-    #print("population_v1", population_v1)
     for i in range(population2.shape[1]):
         population_w2 = (
                 (population2.dot(np.power(2, 0)) / np.power(2, 1) - 0.5) *
                 (decisionvariables[0][1] - decisionvariables[0][0]) + 0.5 * (decisionvariables[0][0] + decisionvariables[0][1]))
-    #print("population_w2", population_w2)
     for i in range(population3.shape[1]):
         population_v2 = (
                 (population3.dot(np.power(2, 0)) / np.power(2, 1) - 0.5) *
@@ -180,63 +130,26 @@ def getDecode1(p0,p1,p2,p3, decisionvariables):
         population_w1 = (
                 (p0.dot(np.power(2, 0)) / np.power(2, 1) - 0.5) *
                 (decisionvariables[0][1] - decisionvariables[0][0]) + 0.5 * (decisionvariables[0][0] +decisionvariables[0][1]))
-    #print("population_w1", population_w1)
     for i in range(len(p1)):
         population_v1 = (
                 (p1.dot(np.power(2, 0)) / np.power(2, 1) - 0.5) *
                 (decisionvariables[0][1] - decisionvariables[0][0]) + 0.5 * (decisionvariables[0][0] + decisionvariables[0][1]))
-    #print("population_v1", population_v1)
     for i in range(len(p2)):
         population_w2 = (
                 (p2.dot(np.power(2, 0)) / np.power(2, 1) - 0.5) *
                 (decisionvariables[0][1] - decisionvariables[0][0]) + 0.5 * (decisionvariables[0][0] + decisionvariables[0][1]))
-    #print("population_w2", population_w2)
     for i in range(len(p3)):
         population_v2 = (
                 (p3.dot(np.power(2, 0)) / np.power(2, 1) - 0.5) *
                 (decisionvariables[0][1] - decisionvariables[0][0]) + 0.5 * ( decisionvariables[0][0] + decisionvariables[0][1]))
     return population_w1,population_v1,population_w2,population_v2
- # 染色体解码得到表现形的解
-# def getDecode(population, encodelength, decisionvariables, delta):
-#      # 得到population中有几个元素
-#      populationsize = population.shape[0]  # 100&200
-#      #print('populationsize',populationsize)
-#      length = len(encodelength)  # 2
-#      #print('length',length)
-#      decodeVariables = np.zeros((populationsize, length), dtype=np.float) #(100,2)
-#      #print('decodeVariables',decodeVariables)
-#      # 将染色体拆分添加到解码数组decodeVariables中
-#      for i, populationchild in enumerate(population): #population 是(100,33)数组
-#          # 设置起始点
-#          start = 0
-#          for j, lengthchild in enumerate(encodelength): # encodelength = [18,15]
-#              power = lengthchild - 1
-#              decimal = 0
-#              for k in range(start, start + lengthchild):
-#                  # 二进制转为十进制
-#                  decimal += populationchild[k] * (2 ** power)
-#                  power = power - 1
-#              # 从下一个染色体开始
-#              start = lengthchild
-#              lower = decisionvariables[j][0]
-#              uper = decisionvariables[j][1]
-#              # 转换为表现形
-#              decodevalue = lower + decimal * (uper - lower) / (2 ** lengthchild - 1)
-#              # 将解添加到数组中
-#              decodeVariables[i][j] = decodevalue
-#      print("decodeVariables",decodeVariables)
-#      return decodeVariables  #(100,2) 100个种群中的两个变量转化成10进制
-
 
  # 得到每个个体的适应度值及累计概率
 def getFitnessValue(func, decode,w1,v1,w2,v2):
-
     # 得到种群的规模和决策变量的个数
-    #print("decode.shape",decode.shape)
     popusize = decode.shape[0]  #100
     # 初始化适应度值空间
     fitnessValue = np.zeros((popusize, 1)) #(100,1)
-    #print("fitnessValue.shape",fitnessValue.shape)
     for popunum in range(popusize):
         fitnessValue[popunum] = func(x_train,y_train,w1,v1,w2,v2,3,2,1,popusize)[-1]
      # 得到每个个体被选择的概率
@@ -260,7 +173,6 @@ def selectNewPopulation(decodepopu, cum_probability):
             if (randomnum < cum_probability[j]):
                 newPopulation[i] = decodepopu[j]
                 break
-    #print('newPopulation',newPopulation)
     return newPopulation
 
 
@@ -335,155 +247,74 @@ def findMinPopulation(population, minevaluation, minSize):
          i = i + 1
      return np.uint8(minPopulation)
 
- # 适应度函数，使用lambda可以不用在函数总传递参数
-#def fitnessFunction():
-     #return lambda a, b: 21.5 + a * np.sin(4 * np.pi * a) + b * np.sin(20 * np.pi * b)
+ # 适应度函数，神经网络训练误差最小为
 def fitnessFunction(dataset, labelset, temp1,temp2,temp3,temp4,inputnum , hiddennum, outputnum,num):
-    # 最起码得是个（300,3,2）等的矩阵
     # x为步长
     x = 0.05
-    # print("temp1",temp1)
-    # print(temp1.shape)
-    # print("temp2", temp2)
-    # print(temp2.shape)
-    # print("temp3", temp3)
-    # print(temp3.shape)
-    # print("temp4", temp4)
-    # print(temp4.shape)
-    if num !=0:
+    if num !=0:#（输入为三维矩阵，第一维是种群数量，后两维是种群维度）
         Value1 = temp2.reshape(num, 1, hiddennum)
-        # print(" Value1", Value1.shape) #(100,1,2)
         Value2 = temp4.reshape(num, outputnum, outputnum)
-        # print(" Value2",Value2.shape) #(100,1,1)
         Weight1 = temp1.reshape(num, inputnum, hiddennum)
-        # print(" Weight1", Weight1.shape) #(100,3,2)
         Weight2 = temp3.reshape(num, hiddennum, outputnum)
-        # print(" Weight2", Weight2.shape) #(100,2,1)
         errors_net = []
         for v1, v2, w1, w2 in zip(Value1, Value2, Weight1, Weight2):
-            # print("w1", w1)
-            # print("v1", v1)
-            # print("v2", v2)
-            # print("w2", w2)
             errors = []
             for i in range(len(dataset)):
                 # 输入数据
                 inputset = np.mat(dataset[i]).astype(np.float64)
-                # print("inputset", i, inputset)
-                # print(inputset.shape)  # (1,3)
                 # 数据标签
                 outputset = np.mat(labelset[i]).astype(np.float64)
-                # print('outputset', outputset)
-                # print(outputset.shape)  # (1,1)
                 # 隐层输入
-                # input1 = np.einsum("ijk,ikn->ijn", inputset, Weight1).astype(np.float64)
-                # input1 = np.dot(inputset, Weight1).astype(np.float64)
                 input1 = np.dot(inputset, w1).astype(np.float64)
-                # print("隐含层输入：", input1)
-                # print(input1.shape)  # (1,2)
                 # 隐层输出
-                # output2 = relu(input1 - value1).astype(np.float64)
-
-                # output2 = sigmoid(input1 - Value1).astype(np.float64)
                 output2 = sigmoid(input1 - v1).astype(np.float64)
-                # print("隐层输出:", output2)  # (1,2)
                 # 输出层输入
-                # input2 = np.einsum("ijk,ikn->ijn", output2, Weight2).astype(np.float64)
-                # input2 = np.dot(output2, Weight2).astype(np.float64)
                 input2 = np.dot(output2, w2).astype(np.float64)
-                # 输出层输出
-                # output3 = input2 - Value2
+                # 输出层输出，回归预测不带激活函数
                 output3 = input2 - v2
-                # print("输出层输出", output3)
-                # print(output3.shape)  # (1,1)
-                # output3 = sigmoid(input2 - value2).astype(np.float64)
+                #误差绝对值
                 error = abs(output3 - y_train[i])
                 errors.append(error)
 
-                # 更新公式由矩阵运算表示 用的是平方误差
-                # a = np.multiply(output3, 1 - output3) #最后一层激活函数求导
-                # g = output3 - outputset #最后一层直接求导，无激活函数，为输出层阈值求导
+                # 更新公式由矩阵运算表示 用的是平方误差               
                 g = outputset - output3  # 最后一层直接求导 ，为输出层阈值求导
-                # print("g", g)
-                # print(g.shape)  # (1,1)
-                # g = np.multiply(a, outputset - output3)
-                # b = np.dot(g, np.transpose(Weight2))
                 b = np.dot(g, np.transpose(w2))
-
-                # b = np.einsum("ijk,ikn->ijn", g, Weight2.transpose(0, 2, 1))
-                # print("b", b.shape)  # (1,2)
-                # c = output2
                 c = np.multiply(output2, 1 - output2)
-                # print("c", c)
-                # print(c.shape)  # (1,2)
                 e = np.multiply(b, c)  # 隐藏层之间阈值
 
                 value1_change = -x * e
                 value2_change = -x * g
-                # print("value2_change:", value2_change)
-                # print(value2_change.shape)  # (1,1)
-                # weight1_change = x * np.einsum("ijk,ikn->ijn", inputset.transpose(0, 2, 1), e)
-                # weight2_change = x * np.einsum("ijk,ikn->ijn", output2.transpose(0, 2, 1), g)
                 weight1_change = x * np.dot(np.transpose(inputset), e)
-                weight2_change = x * np.dot(np.transpose(output2), g)
-                # print("weight1_change", weight1_change)
-                # print(weight1_change.shape)
-                # print('dataset[i]_temp',dataset[i])
-                # 更新参数
-                # print("Value1", Value1)
-                # Value1 += value1_change
-                # Value2 += value2_change
-                # Weight1 += weight1_change
-                # Weight2 += weight2_change
+                weight2_change = x * np.dot(np.transpose(output2), g) 
                 v1 += value1_change
                 v2 += value2_change
                 w1 += weight1_change
                 w2 += weight2_change
-            # print("errors",errors)
             error_net = np.array(min(errors)).flatten()
-            errors_net.append(error_net)  # (100,1)
-            # print("error_net", error_net)
-            # print("errors_net",errors_net)
-            # errors_net1 = np.array(errors_net)
-            # print("errors_net1",errors_net1.shape)
+            errors_net.append(error_net)  
         return w1, w2, v1, v2, output3, error_net
-    else:
+    else: #输入是二维矩阵只有权重的维度
         Value1 = temp2.reshape(1, hiddennum)
-        #print(" Value1", Value1.shape) #(1,2)
         Value2 = temp4.reshape(outputnum, outputnum)
-        # print(" Value2",Value2.shape) #(1,1)
         Weight1 = temp1.reshape(inputnum, hiddennum)
-        #print(" Weight1", Weight1.shape) #(3,2)
         Weight2 = temp3.reshape(hiddennum, outputnum)
-        # print(" Weight2", Weight2.shape) #(2,1)
         for i in range(len(dataset)):
             # 输入数据
             inputset = np.mat(dataset[i]).astype(np.float64)
-            # print('inputset', inputset)
-            # print(inputset.shape)
             # 数据标签
             outputset = np.mat(labelset[i]).astype(np.float64)
             # 隐层输入
             input1 = np.dot(inputset, Weight1).astype(np.float64)
-            #print("隐含层输入：", input1)
             # 隐层输出
-            # output2 = relu(input1 - value1).astype(np.float64)
-
             output2 = sigmoid(input1 - Value1).astype(np.float64)
-            #print("隐层输出:", output2)
             # 输出层输入
             input2 = np.dot(output2, Weight2).astype(np.float64)
             # 输出层输出
             output3 = input2 - Value2
-            # output3 = sigmoid(input2 - value2).astype(np.float64)
 
             # 更新公式由矩阵运算表示 用的是平方误差
-            # a = np.multiply(output3, 1 - output3) #最后一层激活函数求导
-            # g = output3 - outputset #最后一层直接求导，无激活函数，为输出层阈值求导
             g = outputset - output3  # 最后一层直接求导 ，为输出层阈值求导
-            # g = np.multiply(a, outputset - output3)
             b = np.dot(g, np.transpose(Weight2))
-            # c = output2
             c = np.multiply(output2, 1 - output2)
             e = np.multiply(b, c)  # 隐藏层之间阈值
 
@@ -491,13 +322,14 @@ def fitnessFunction(dataset, labelset, temp1,temp2,temp3,temp4,inputnum , hidden
             value2_change = -x * g
             weight1_change = x * np.dot(np.transpose(inputset), e)
             weight2_change = x * np.dot(np.transpose(output2), g)
-            #print("Value1aaa",Value1)
+
             # 更新参数
             Value1 += value1_change
             Value2 += value2_change
             Weight1 += weight1_change
             Weight2 += weight2_change
-    return Weight1,Weight2,Value1,Value2,
+    return Weight1,Weight2,Value1,Value2
+
 def parameter_initialization(opt):
     # 输入层与隐层的连接权重
     weight1 =opt[0:6]
@@ -507,13 +339,10 @@ def parameter_initialization(opt):
     value1 = opt[8:10]
     # 输出层阈值
     value2 = opt[10:11]
-
     return weight1, weight2, value1, value2
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
-
-
 
 def test_process(dataset, labelset, weight1, weight2, value1, value2):
     pre_data = []
@@ -521,32 +350,32 @@ def test_process(dataset, labelset, weight1, weight2, value1, value2):
         # 计算每一个样例通过该神经网路后的预测值
         inputset = np.mat(dataset[i]).astype(np.float64)
         outputset = np.mat(labelset[i]).astype(np.float64)
-        #output2 = relu(np.dot(inputset, weight1) - value1)
         output2 = sigmoid(np.dot(inputset, weight1) - value1)
         output3 = np.dot(output2, weight2) - value2
         output3 = output3.tolist()
         pre_data.append(output3)
         pre_data = list(_flatten(pre_data))
-        #pre_data = de_max_min_norm_y(labelset, pre_data)
-        #output3 = sigmoid(np.dot(output2, weight2) - value2)
-        #print("预测为%f, 实际为%f" % (output3, labelset[i]))
-        # 返回预测值
     return pre_data
+
+
 if __name__ == "__main__":
+    #要打开的文件名
     iris_file = 'advertise.txt'
+    #数据预处理
     Data = load_data_wrapper(iris_file)
+    #分离特征标签值，x为数据集的feature数据，y为label.
     x, y = splitData(Data)
-    print("x", x)
+    #数据归一化
     x_norm = max_min_norm_x(x)
-    y_norm = max_min_norm_y(y)
-    # x为数据集的feature数据，y为label.
+    #数据归一化
+    y_norm = max_min_norm_y(y)    
+    #分训练和测试集
     x_train, x_test, y_train, y_test = train_test_split(x_norm, y_norm, test_size=0.3)
     optimalvalue = []
     optimalvariables = []
 
     # 两个决策变量的上下界，多维数组之间必须加逗号
-    # decisionVariables = [[-3.0, 12.1], [4.1, 5.8]]
-    decisionVariables = [[-5.0, 5.0]] * 4  # 参数： W1, W2, V1, V2
+    decisionVariables = [[-5.0, 5.0]] * 4  # 神经网络参数： W1, W2, V1, V2
     # 精度
     delta = 0.0001
     # 获取染色体长度
@@ -554,9 +383,7 @@ if __name__ == "__main__":
     # 种群数量
     initialPopuSize = 10
     # 初始生成100个种群
-    population, population0, population1, population2, population3 = getinitialPopulation(sum(EncodeLength), L0, L1, L2,
-                                                                                          L3, initialPopuSize)
-    # print("population",population)
+    population, population0, population1, population2, population3 = getinitialPopulation(sum(EncodeLength), L0, L1, L2,L3, initialPopuSize)
     # 最大进化代数
     maxgeneration = 80
     # 交叉概率
@@ -568,8 +395,7 @@ if __name__ == "__main__":
 
     for generation in range(maxgeneration):
         # 对种群解码得到表现形
-        decode, W1, V1, W2, V2 = getDecode(population, population0, population1, population2, population3, EncodeLength,
-                                           decisionVariables)
+        decode, W1, V1, W2, V2 = getDecode(population, population0, population1, population2, population3, EncodeLength, decisionVariables)
         # 得到适应度值和累计概率值
         evaluation, cum_proba = getFitnessValue(fitnessFunction, decode, W1, V1, W2, V2)
         # 选择新的种群
@@ -579,65 +405,42 @@ if __name__ == "__main__":
         # 变异操作
         mutationpopulation = mutation(crossPopulations, mutationprob)
         # 将父母和子女合并为新的种群
-        # print("mutationpopulation", mutationpopulation)
-        # print("mutationpopulation.shape", mutationpopulation.shape)
         totalpopulation = np.vstack((population, mutationpopulation))
-        # print("totalpopulation", totalpopulation)
-        # print("totalpopulation.shape", totalpopulation.shape)
         w11, v11, w22, v22 = getPopulation(totalpopulation, totalpopulation.shape[0])
 
         # 最终解码
-        final_decode, W11, V11, W22, V22 = getDecode(totalpopulation, w11, v11, w22, v22, EncodeLength,
-                                                     decisionVariables)
+        final_decode, W11, V11, W22, V22 = getDecode(totalpopulation, w11, v11, w22, v22, EncodeLength,decisionVariables)
         # 适应度评估
         final_evaluation, final_cumprob = getFitnessValue(fitnessFunction, final_decode, W11, V11, W22, V22)
 
-        # 最终解码
-        # final_decode = getDecode(totalpopulation,W11,V11,W22,V22, EncodeLength, decisionVariables, delta)
-        # 适应度评估
-        # final_evaluation, final_cumprob = getFitnessValue(fitnessFunction, final_decode)
         # 选出适应度最大的100个重新生成种群
         population = findMinPopulation(totalpopulation, final_evaluation, maxPopuSize)
-        # print("pop", population)
         # 找到本轮中适应度最小的值
         optimalvalue.append(np.min(final_evaluation))
-        # print("optimalvalue", optimalvalue)
         index = np.where(final_evaluation == min(final_evaluation))
-        # print("index1", index)
-        # print("index[0][0]", index[0][0])
-        # print("pp", totalpopulation[index[0][0]])
-        # print("final_decode[index[0][0]]",final_decode[index[0][0]])
-        # optimalvariables.append(list(final_decode[index[0][0]]))
-        # optimalvariables.append((final_decode[index[0][0]]).tolist())
         optimalvariables.append((totalpopulation[index[0][0]]).tolist())
-
-    # print("optimalvariables", optimalvariables)
-
-    # optimalval = np.max(optimalvalue)
-    # index = np.where(optimalvalue == max(optimalvalue))
+    #找出适应度的最小值
     optimalval = np.min(optimalvalue)
-    #print("optimalval", optimalval)
+    #找出适应最小值所对应的索引
     index = np.where(optimalvalue == min(optimalvalue))
-    #print("index2", index)
     optimalvar = optimalvariables[index[0][0]]
-    #print("optimalvar", optimalvar)
     optimalvar = np.array(optimalvar)
+    #把这个个体还原成神经网络的权重、阈值
     weight11, weight21, value11, value21 = parameter_initialization(optimalvar)
     weight1, weight2, value1, value2 = getDecode1(weight11, weight21, value11, value21, decisionVariables)
+    #训练
     for i in range(700):
         Weight1, Weight2, Value1, Value2 = fitnessFunction(x_train, y_train, weight1, weight2, value1, value2, 3, 2, 1, 0)
+    #预测
     pre = test_process(x_test, y_test, Weight1, Weight2, Value1, Value2)
-    print("pre\n",pre)
-    print("max_y:", max(y))
-    print("min_y:",min(y))
+   
+    #均方误差
+    errors_std = np.std(np.array(pre) - np.array(y_test))
+    #归一化还原均方误差
     pre_org = np.array(pre) * (max(y)-min(y)) + min(y)
     y_test_org = np.array(y_test) * (max(y) - min(y)) + min(y)
-    print("pre_org\n",pre_org)
-    print("y_test_org\n",y_test_org)
-    errors_std = np.std(np.array(pre) - np.array(y_test))
     errors_std_org = np.std(pre_org - y_test_org)
-    print("errors_std:\n",errors_std)
-    print("errors_std_org\n",errors_std_org)
+    #显示测试图像
     plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False
     x = np.linspace(0, 60, 60)
