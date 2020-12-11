@@ -31,3 +31,8 @@ python 用GA算法优化BP神经网络，预测回归问题
 单独用BP神经网络，学习率：0.05，迭代500次：
 测试样本60个的平均无误差，errors_std_org：3.2695353501231272
 ![Iamge](https://github.com/yx868868/GA-optimized-neural-network/blob/main/pic/BP500.png)
+
+单独用BP神经网络，学习率：0.05，迭代700次：
+测试样本60个的平均无误差，errors_std_org：1.812
+![Iamge](https://github.com/yx868868/GA-optimized-neural-network/blob/main/pic/BP700%E6%AC%A14.png)
+
